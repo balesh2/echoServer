@@ -5,24 +5,38 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Server {
+  private static int messageSize = 1000;
+
   public static void main(String[] args) throws IOException {
     ServerSocket serverSocket = new ServerSocket(4444);
 
     while (true) {
-      Socket clientConnection = serverSocket.accept();
+      try {
+        Socket clientConnection = serverSocket.accept();
 
-      InputStream in = clientConnection.getInputStream();
-      OutputStream out = clientConnection.getOutputStream();
+        new Thread(()-> {
 
-      int b;
-      while ((b = in.read()) != -1) {
-        out.write(b);
-        out.flush();
+          try {
+            InputStream in = clientConnection.getInputStream();
+            OutputStream out = clientConnection.getOutputStream();
+
+            byte[] buffer = new byte[messageSize];
+            int read = 0;
+            while ((read = in.read(buffer)) != -1) {
+              out.write(buffer, 0, read);
+              out.flush();
+            }
+
+            out.close();
+            in.close();
+            clientConnection.close();
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+        }).start();
+      } catch (IOException e) {
+        e.printStackTrace();
       }
-
-      out.close();
-      in.close();
-      clientConnection.close();
     }
   }
 }
