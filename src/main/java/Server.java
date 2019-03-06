@@ -6,6 +6,7 @@ import java.net.Socket;
 
 public class Server {
   private static int messageSize = 1000;
+  private static boolean bidirectional = false;
 
   public static void main(String[] args) throws IOException {
     ServerSocket serverSocket = new ServerSocket(4444);
@@ -23,8 +24,9 @@ public class Server {
             byte[] buffer = new byte[messageSize];
             int read = 0;
             while ((read = in.read(buffer)) != -1) {
-//              out.write(buffer, 0, read);
-//              out.flush();
+              if(bidirectional) {
+                out.write(buffer, 0, read);
+              }
             }
 
             out.close();
