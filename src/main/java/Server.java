@@ -23,8 +23,8 @@ public class Server {
             byte[] buffer = new byte[messageSize];
             int read = 0;
             while ((read = in.read(buffer)) != -1) {
-              out.write(buffer, 0, read);
-              out.flush();
+//              out.write(buffer, 0, read);
+//              out.flush();
             }
 
             out.close();
