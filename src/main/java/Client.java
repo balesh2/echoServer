@@ -2,11 +2,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.concurrent.atomic.LongAdder;
 
 public class Client {
   static volatile boolean running = true;
-  static volatile long sent = 0;
-  static volatile long received = 0;
+  static LongAdder sent = new LongAdder();
+  static LongAdder received = new LongAdder();
   static boolean bidirectional = false;
   static int packetSize = 1000;
   static int threadCount = 100;
@@ -25,9 +26,11 @@ public class Client {
           break;
         }
 
-        System.out.println("sent: " + (sent - previousSent) + ", received: " + (received - previousReceived));
-        previousSent = sent;
-        previousReceived = received;
+        long currentSent = sent.sum();
+        long currentReceived = received.sum();
+        System.out.println("sent: " + (currentSent - previousSent) + ", received: " + (currentReceived - previousReceived));
+        previousSent = currentSent;
+        previousReceived = currentReceived;
       }
     });
     statSampler.start();
@@ -45,14 +48,14 @@ public class Client {
 
           while (true) {
             out.write(buffer);
-            sent += packetSize;
+            sent.add(packetSize);
 
             if (bidirectional) {
               int read = in.read(buffer);
               if (-1 == read) {
                 break;
               }
-              received += read;
+              received.add(read);
             }
           }
 
